@@ -31,11 +31,15 @@ return [
     ],
 
     'amoCRM'   => [
-        'client_secret'                => env('AMOCRM_CLIENT_SECRET', null),
-        'redirect_uri'                 => env('AMOCRM_REDIRECT_URI', null),
-        'subdomain'                    => env('AMOCRM_SUBDOMAIN', null),
-        'mortgage_pipeline_id'         => env('AMOCRM_MORTGAGE_PIPELINE_ID', null),
-        'mortgage_responsible_user_id' => env('AMOCRM_MORTGAGE_RESPONSIBLE_USER', null),
-        'mortgage_first_stage_id'      => env('AMOCRM_MORTGAGE_FIRST_STAGE', null),
+        'client_secret'                     => env('AMOCRM_CLIENT_SECRET', null),
+        'redirect_uri'                      => env('AMOCRM_REDIRECT_URI', null),
+        'subdomain'                         => env('AMOCRM_SUBDOMAIN', null),
+        'discount_card_field_id'            => env('AMOCRM_DISCOUNT_CARD_FIELD_ID', null),
+        'discounted_price_field_id'         => env('AMOCRM_DISCOUNTED_PRICE_FIELD_ID', null),
+        'conditionally_successful_stage_id' => env('AMOCRM_CONDITIONALLY_SUCCESSFUL_STAGE_ID', null),
+
+        'mortgage_pipeline_id'              => env('AMOCRM_MORTGAGE_PIPELINE_ID', null),
+        'mortgage_responsible_user_id'      => env('AMOCRM_MORTGAGE_RESPONSIBLE_USER', null),
+        'mortgage_first_stage_id'           => env('AMOCRM_MORTGAGE_FIRST_STAGE', null),
     ],
 ];

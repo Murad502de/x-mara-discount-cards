@@ -512,7 +512,7 @@ class amoAPIHub
 
     public function updateLead($data)
     {
-        $url = "https://" . config('app.amoCRM.subdomain') . ".amocrm.ru/api/v4/leads";
+        $url = "https://" . config('services.amoCRM.subdomain') . ".amocrm.ru/api/v4/leads";
 
         try {
             $response = $this->client->sendRequest(

@@ -2,9 +2,10 @@
 
 namespace App\Console;
 
+use App\Schedule\ParseRecentWebhooks;
+use App\Schedule\StartQueueProcessing;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -16,9 +17,13 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->call(function () {
-            Log::info(__METHOD__, ['schedule[test][everyThreeMinutes]']);
-        })->everyFiveMinutes();
+        $schedule->call(new ParseRecentWebhooks)
+            ->name('parse_recent_webhooks')
+            ->withoutOverlapping()
+            ->everyMinute();
+        $schedule->exec((new StartQueueProcessing)(true))
+            ->name('start_queue_processing')
+            ->everyMinute();
     }
 
     /**

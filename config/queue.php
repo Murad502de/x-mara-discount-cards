@@ -45,5 +45,10 @@ return [
         'database' => env('DB_CONNECTION', 'mysql'),
         'table'    => 'failed_jobs',
     ],
-
+    'rateLimits'  => [
+        'default' => [ // queue name
+            'allows' => 5, // 5 jobs
+            'every' => 1, // per 1 second
+        ],
+    ],
 ];
