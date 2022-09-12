@@ -5,6 +5,7 @@ namespace App\Http\Requests\Api\Services\AmoCrm;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Support\Facades\Log;
 
 class AuthRequest extends FormRequest
 {
@@ -25,6 +26,8 @@ class AuthRequest extends FormRequest
      */
     public function rules()
     {
+        Log::info(__METHOD__, ['AuthRequest[rules]']); //DELETE
+
         return [
             'code'        => 'required',
             'referer'     => 'required',
