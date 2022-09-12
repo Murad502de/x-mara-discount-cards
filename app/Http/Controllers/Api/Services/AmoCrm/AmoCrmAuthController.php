@@ -7,14 +7,14 @@ use App\Http\Requests\Api\Services\AmoCrm\AuthRequest;
 use App\Models\Services\amoCRM;
 use App\Services\amoAPI\amoAPIHub;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+
 
 class AmoCrmAuthController extends Controller
 {
-    public function signin(Request $request)
+    public function signin(AuthRequest $request)
     {
-        Log::info(__METHOD__, ['AmoCrmAuthController[rusigninles]', json_encode($request->all())]); //DELETE
+        Log::info(__METHOD__, ['AmoCrmAuthController[signin] ' . json_encode($request->all())]); //DELETE
 
         $authData = [
             'client_id'     => $request->all()['client_id'],
