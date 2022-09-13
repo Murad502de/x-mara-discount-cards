@@ -57,7 +57,7 @@ class LeadCron extends Model
         foreach ($leads as $lead) {
             $LEAD = Lead::getLeadByAmoId((int) $lead->lead_id);
 
-            $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
+            // $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
 
             Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
             // Log::info(__METHOD__, [json_encode($lead)]); //DELETE
