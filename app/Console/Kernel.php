@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
             ->everyMinute();
         $schedule->exec((new StartQueueProcessing)(false))
             ->name('start_queue_processing')
-            ->everyMinute();
+            ->everyTwoMinutes();
     }
 
     /**
