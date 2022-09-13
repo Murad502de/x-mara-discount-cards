@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
+use Illuminate\Support\Facades\DB;
+
 // use App\Models\Card;
 
 class LeadCron extends Model
@@ -59,7 +61,9 @@ class LeadCron extends Model
 
             Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
 
-            $lead->delete();
+            DB::table('lead_crons')->where('lead_id', (int) $lead->lead_id)->delete();
+
+            // $lead->delete();
 
             // self::where('lead_id', (int) $lead->lead_id)->delete();
         }
