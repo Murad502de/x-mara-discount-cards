@@ -56,9 +56,12 @@ class LeadCron extends Model
             $LEAD = Lead::getLeadByAmoId((int) $lead->lead_id);
 
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
-            // $lead->delete();
 
-            self::where('lead_id', (int) $lead->lead_id)->delete();
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
+
+            $lead->delete();
+
+            // self::where('lead_id', (int) $lead->lead_id)->delete();
         }
     }
 
