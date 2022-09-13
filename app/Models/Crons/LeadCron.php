@@ -63,7 +63,7 @@ class LeadCron extends Model
 
             // DB::table('lead_crons')->where('lead_id', $lead->lead_id)->delete();
 
-            // $lead->delete();
+            $lead->delete();
 
             // self::where('lead_id', (int) $lead->lead_id)->delete();
         }
