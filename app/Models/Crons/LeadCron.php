@@ -62,9 +62,9 @@ class LeadCron extends Model
             Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
             Log::info(__METHOD__, [json_encode($lead)]); //DELETE
 
-            $lead->delete();
+            $tmp = $lead->delete();
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETEd]']); //DELETE
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETEd] ' . $tmp]); //DELETE
         }
     }
 
