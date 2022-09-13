@@ -56,7 +56,9 @@ class LeadCron extends Model
             $LEAD = Lead::getLeadByAmoId((int) $lead->lead_id);
 
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
-            $lead->delete();
+            // $lead->delete();
+
+            self::where('lead_id', (int) $lead->lead_id)->delete();
         }
     }
 
