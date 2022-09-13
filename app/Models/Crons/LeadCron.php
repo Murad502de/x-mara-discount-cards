@@ -71,14 +71,20 @@ class LeadCron extends Model
         $CUSTOM_FIELD = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
         $CARD_NUMBER  = self::findDiscountCardValue($CUSTOM_FIELD);
 
-        $updateLead = Lead::updateLead(
-            (int) $LEAD->amocrm_id,
-            (int) $LEAD_DATA['status_id'],
-            $CARD_NUMBER,
-            (int) $LEAD_DATA['price'],
-        );
+        if (
+            (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
+            (int) $LEAD->price !== (int) $LEAD_DATA['price'] ||
+            $LEAD->card->number !== $CARD_NUMBER
+        ) {
+            $updateLead = Lead::updateLead(
+                (int) $LEAD->amocrm_id,
+                (int) $LEAD_DATA['status_id'],
+                $CARD_NUMBER,
+                (int) $LEAD_DATA['price'],
+            );
 
-        CalculatePriceWithDiscount::dispatch($updateLead);
+            CalculatePriceWithDiscount::dispatch($updateLead);
+        }
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void
     {
