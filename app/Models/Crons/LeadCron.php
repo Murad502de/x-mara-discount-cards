@@ -8,10 +8,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 
-use Illuminate\Support\Facades\DB;
-
-// use App\Models\Card;
-
 class LeadCron extends Model
 {
     use HasFactory;
@@ -59,12 +55,7 @@ class LeadCron extends Model
 
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
-            // Log::info(__METHOD__, [json_encode($lead)]); //DELETE
-
-            $tmp = $lead->delete();
-
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETED] ' . $tmp]); //DELETE
+            $lead->delete();
         }
     }
 
