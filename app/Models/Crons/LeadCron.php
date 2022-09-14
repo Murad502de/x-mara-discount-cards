@@ -123,5 +123,7 @@ class LeadCron extends Model
                 return $customField['values'][0]['value'];
             }
         }
+
+        return null;
     }
 }
