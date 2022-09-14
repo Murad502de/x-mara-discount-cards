@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Jobs\Middleware\AmoTokenExpirationControl;
 use App\Models\Lead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -33,5 +34,15 @@ class CalculatePriceWithDiscount implements ShouldQueue
     public function handle()
     {
         $this->lead->calculateDiscountPrice();
+    }
+
+    /**
+     * Get the intermediary through which the job should go.
+     *
+     * @return array
+     */
+    public function middleware()
+    {
+        return [new AmoTokenExpirationControl];
     }
 }

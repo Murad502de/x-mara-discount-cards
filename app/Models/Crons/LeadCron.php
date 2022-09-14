@@ -83,7 +83,11 @@ class LeadCron extends Model
                 (int) $LEAD_DATA['price'],
             );
 
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
+
             CalculatePriceWithDiscount::dispatch($updateLead);
+        } else {
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
         }
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void
