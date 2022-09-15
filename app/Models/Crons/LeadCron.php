@@ -74,7 +74,7 @@ class LeadCron extends Model
         if (
             (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
             (int) $LEAD->price !== (int) $LEAD_DATA['price'] ||
-            $LEAD->card->number !== $CARD_NUMBER
+            ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER))
         ) {
             $updateLead = Lead::updateLead(
                 (int) $LEAD->amocrm_id,
