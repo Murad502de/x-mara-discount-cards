@@ -76,7 +76,7 @@ class LeadCron extends Model
         if (
             (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
             (int) $LEAD->price !== (int) $LEAD_DATA['price'] ||
-            ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER))
+            (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
         ) {
             $updateLead = Lead::updateLead(
                 (int) $LEAD->amocrm_id,
@@ -85,11 +85,11 @@ class LeadCron extends Model
                 (int) $LEAD_DATA['price'],
             );
 
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
 
             CalculatePriceWithDiscount::dispatch($updateLead);
         } else {
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
         }
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void
