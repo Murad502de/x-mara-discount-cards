@@ -54,6 +54,8 @@ class Lead extends Model
 
         $DISCOUNT_PRICE = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
 
+        Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
+
         self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE);
     }
     public static function createLead(
@@ -139,7 +141,7 @@ class Lead extends Model
     }
 
     /* PROCEDURES */
-    private static function applyUpdates(int $amocrmId, int $discount_price): void
+    private static function applyUpdates(int $amocrmId, float $discount_price): void
     {
         Log::info(__METHOD__, ['Lead[applyUpdates] ', $discount_price]); //DELETE
 
