@@ -6,7 +6,6 @@ use App\Models\Services\amoCRM;
 use App\Services\amoAPI\amoAPIHub;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 
 class Lead extends Model
 {
@@ -107,6 +106,13 @@ class Lead extends Model
         $leads = self::all()
             ->where('card_id', $this->card_id)
             ->where('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_3'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_4'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_5'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_6'))
+            ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_7'))
             ->toArray();
 
         $totalPrice = 0;
