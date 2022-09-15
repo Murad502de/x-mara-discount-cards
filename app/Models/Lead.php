@@ -6,6 +6,7 @@ use App\Models\Services\amoCRM;
 use App\Services\amoAPI\amoAPIHub;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
 class Lead extends Model
 {
@@ -103,8 +104,7 @@ class Lead extends Model
     /* FUNCTIONS */
     private function getTotalPrice(): int
     {
-        $leads = self::all()
-            ->where('card_id', $this->card_id)
+        $leads = self::where('card_id', $this->card_id)
             ->where('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
             ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
             ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
