@@ -52,7 +52,7 @@ class Lead extends Model
 
         // $DISCOUNT_PRICE = (int) $this->price - round(((int) $this->price / 100) * $DISCOUNT_PERCENT);
 
-        $DISCOUNT_PRICE = (int) $this->price - ((int) $this->price / 100) * $DISCOUNT_PERCENT;
+        $DISCOUNT_PRICE = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
 
         self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE);
     }
