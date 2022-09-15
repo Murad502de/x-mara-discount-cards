@@ -53,7 +53,7 @@ class LeadCron extends Model
         foreach ($leads as $lead) {
             $LEAD = Lead::getLeadByAmoId((int) $lead->lead_id);
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][lead] ' . $lead->lead_id]); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][lead] ' . $lead->lead_id]); //DELETE
 
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
 
@@ -85,11 +85,11 @@ class LeadCron extends Model
                 (int) $LEAD_DATA['price'],
             );
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
 
             CalculatePriceWithDiscount::dispatch($updateLead);
         } else {
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
         }
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void

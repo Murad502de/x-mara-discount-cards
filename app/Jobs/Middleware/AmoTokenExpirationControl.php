@@ -22,7 +22,7 @@ class AmoTokenExpirationControl
 
         if ($authData) {
             if (time() >= (int) $authData['when_expires']) {
-                Log::info(__METHOD__, ['access token expired']); //DELETE
+                // Log::info(__METHOD__, ['access token expired']); //DELETE
 
                 $response = $client->accessTokenUpdate($authData);
 
@@ -40,21 +40,21 @@ class AmoTokenExpirationControl
 
                     amoCRM::auth($accountData);
 
-                    Log::info(__METHOD__, ['access token updated']); //DELETE
+                    // Log::info(__METHOD__, ['access token updated']); //DELETE
 
                     $next($job);
                 } else {
-                    Log::info(__METHOD__, ['Login error with code: ' . $response['code']]); //DELETE
+                    // Log::info(__METHOD__, ['Login error with code: ' . $response['code']]); //DELETE
 
                     $job->release();
                 }
             } else {
-                Log::info(__METHOD__, ['access token ist not expired']); //DELETE
+                // Log::info(__METHOD__, ['access token ist not expired']); //DELETE
 
                 $next($job);
             }
         } else {
-            Log::info(__METHOD__, ['Login data not found']); //DELETE
+            // Log::info(__METHOD__, ['Login data not found']); //DELETE
 
             $job->release();
         }
