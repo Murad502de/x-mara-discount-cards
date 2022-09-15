@@ -109,7 +109,8 @@ class Lead extends Model
             ->where('card_id', $this->card_id)
 
             ->where(function ($query) {
-                $query->where('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
+                $query->where('status_id', (int) config('services.amoCRM.successful_stage_id'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
                     ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
                     ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
                     ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_3'))
