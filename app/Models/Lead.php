@@ -48,11 +48,11 @@ class Lead extends Model
             : self::getDiscountPercent(self::getTotalPrice()))
         : self::ZERO;
 
-        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
+        Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
 
         $DISCOUNT_PRICE = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
 
-        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
+        Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
 
         self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE);
     }
