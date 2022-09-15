@@ -21,7 +21,7 @@ class LeadCron extends Model
         'id',
     ];
 
-    private const PARSE_COUNT = 10;
+    private const PARSE_COUNT = 20;
 
     public static function createLead(string $leadId, int $lastModified, array $data): void
     {
