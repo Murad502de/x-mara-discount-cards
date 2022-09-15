@@ -44,7 +44,7 @@ class LeadCron extends Model
     }
     public static function parseRecentWebhooks()
     {
-        Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks]']); //DELETE
+        // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks]']); //DELETE
 
         $leads = self::orderBy('id', 'asc')
             ->take(self::PARSE_COUNT)
@@ -55,12 +55,12 @@ class LeadCron extends Model
 
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
             // Log::info(__METHOD__, [json_encode($lead)]); //DELETE
 
             $tmp = $lead->delete();
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETED] ' . $tmp]); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETED] ' . $tmp]); //DELETE
         }
     }
 
@@ -83,11 +83,11 @@ class LeadCron extends Model
                 (int) $LEAD_DATA['price'],
             );
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
 
             CalculatePriceWithDiscount::dispatch($updateLead);
         } else {
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
         }
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void

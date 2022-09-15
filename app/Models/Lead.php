@@ -40,7 +40,7 @@ class Lead extends Model
     }
     public function calculateDiscountPrice(): void
     {
-        Log::info(__METHOD__, ['Lead[calculateDiscountPrice]']); //DELETE
+        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice]']); //DELETE
 
         $DISCOUNT_PERCENT = $this->card
         ? (Card::isGold($this->card->number)
@@ -48,13 +48,11 @@ class Lead extends Model
             : self::getDiscountPercent(self::getTotalPrice()))
         : self::ZERO;
 
-        Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
-
-        // $DISCOUNT_PRICE = (int) $this->price - round(((int) $this->price / 100) * $DISCOUNT_PERCENT);
+        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
 
         $DISCOUNT_PRICE = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
 
-        Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
+        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
 
         self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE);
     }
@@ -143,7 +141,7 @@ class Lead extends Model
     /* PROCEDURES */
     private static function applyUpdates(int $amocrmId, float $discount_price): void
     {
-        Log::info(__METHOD__, ['Lead[applyUpdates] ', $discount_price]); //DELETE
+        // Log::info(__METHOD__, ['Lead[applyUpdates] ', $discount_price]); //DELETE
 
         $authData = amoCRM::getAuthData();
         $amo      = new amoAPIHub($authData);
