@@ -32,7 +32,10 @@ class LeadWebhookController extends Controller
 
     private function handle(array $data)
     {
-        if ((int) $data['date_create'] >= (int) config('services.amoCRM.lead_created_at')) {
+        if (
+            isset($data['id']) &&
+            ((int) $data['date_create'] >= (int) config('services.amoCRM.lead_created_at'))
+        ) {
             $lead = LeadCron::getLeadByAmoId($data['id']);
 
             if ($lead) {
