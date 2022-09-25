@@ -37,6 +37,7 @@ return [
         'discount_card_field_id'              => env('AMOCRM_DISCOUNT_CARD_FIELD_ID', null),
         'discounted_price_field_id'           => env('AMOCRM_DISCOUNTED_PRICE_FIELD_ID', null),
         'successful_stage_id'                 => env('AMOCRM_SUCCESSFUL_STAGE_ID', null),
+        'lead_created_at'                     => env('AMOCRM_LEAD_CREATED_AT', null),
         'conditionally_successful_stage_id'   => env('AMOCRM_CONDITIONALLY_SUCCESSFUL_STAGE_ID', null),
         'conditionally_successful_stage_id_1' => env('AMOCRM_CONDITIONALLY_SUCCESSFUL_STAGE_ID_1', null),
         'conditionally_successful_stage_id_2' => env('AMOCRM_CONDITIONALLY_SUCCESSFUL_STAGE_ID_2', null),
