@@ -107,7 +107,6 @@ class Lead extends Model
     {
         $leads = self::query()
             ->where('card_id', $this->card_id)
-
             ->where(function ($query) {
                 $query->where('status_id', (int) config('services.amoCRM.successful_stage_id'))
                     ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
