@@ -55,7 +55,7 @@ class Lead extends Model
 
         // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
 
-        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE);
+        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_PERCENT);
     }
     public static function createLead(
         int $amocrmId,
@@ -109,15 +109,6 @@ class Lead extends Model
             ->where('card_id', $this->card_id)
             ->where(function ($query) {
                 $query->where('status_id', '<>', (int) config('services.amoCRM.loss_stage_id'));
-
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_3'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_4'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_5'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_6'))
-                    // ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_7'));
             })
             ->get()
             ->toArray();
@@ -152,20 +143,23 @@ class Lead extends Model
     }
 
     /* PROCEDURES */
-    private static function applyUpdates(int $amocrmId, float $discount_price): void
+    private static function applyUpdates(int $amocrmId, float $discount_price, float $discount_percent): void
     {
-        // Log::info(__METHOD__, ['Lead[applyUpdates] ', $discount_price]); //DELETE
+        // Log::info(__METHOD__, ['Lead[amocrmId] ', $amocrmId]); //DELETE
+        // Log::info(__METHOD__, ['Lead[discount_price] ', $discount_price]); //DELETE
+        // Log::info(__METHOD__, ['Lead[discount_percent] ', $discount_percent]); //DELETE
 
         $authData = amoCRM::getAuthData();
         $amo      = new amoAPIHub($authData);
 
         $amo->updateLead([[
-            "id"                   => (int) $amocrmId,
+            'id'                   => (int) $amocrmId,
+            'price'                => $discount_price,
             'custom_fields_values' => [
                 [
-                    'field_id' => (int) config('services.amoCRM.discounted_price_field_id'),
+                    'field_id' => (int) config('services.amoCRM.discount_common'),
                     'values'   => [[
-                        'value' => $discount_price,
+                        'value' => $discount_percent . ' %',
                     ]],
                 ],
             ],

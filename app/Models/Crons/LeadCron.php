@@ -83,7 +83,10 @@ class LeadCron extends Model
                 (int) $LEAD->amocrm_id,
                 (int) $LEAD_DATA['status_id'],
                 $CARD_NUMBER,
-                (int) $LEAD_DATA['price'],
+                (int) AmoLead::findCustomFieldById(
+                    $CUSTOM_FIELD,
+                    config('services.amoCRM.price_without_discount_id')
+                ),
             );
 
             // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
@@ -104,7 +107,10 @@ class LeadCron extends Model
                 (int) $lead->lead_id,
                 (int) $LEAD_DATA['status_id'],
                 $CARD_NUMBER,
-                (int) $LEAD_DATA['price'],
+                (int) AmoLead::findCustomFieldById(
+                    $CUSTOM_FIELD,
+                    config('services.amoCRM.price_without_discount_id')
+                ),
             );
 
             CalculatePriceWithDiscount::dispatch($newLead);

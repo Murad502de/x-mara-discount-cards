@@ -9,6 +9,8 @@ use App\Http\Requests\Api\Webhooks\LeadWebhookUpdateRequest;
 use App\Models\Crons\LeadCron;
 use Illuminate\Http\Response;
 
+use Illuminate\Support\Facades\Log;
+
 class LeadWebhookController extends Controller
 {
     public function create(LeadWebhookAddRequest $request)
