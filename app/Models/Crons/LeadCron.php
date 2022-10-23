@@ -7,6 +7,7 @@ use App\Models\Lead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use App\Services\amoAPI\Entities\Lead as AmoLead;
 
 class LeadCron extends Model
 {
@@ -113,19 +114,24 @@ class LeadCron extends Model
     /* FUNCTIONS */
     private static function findDiscountCardValue($customFields): ?string
     {
-        if (!$customFields) {
-            return null;
-        }
+        // if (!$customFields) {
+        //     return null;
+        // }
 
-        foreach ($customFields as $customField) {
-            if (
-                (int) $customField['id'] ===
-                (int) config('services.amoCRM.discount_card_field_id')
-            ) {
-                return $customField['values'][0]['value'];
-            }
-        }
+        // foreach ($customFields as $customField) {
+        //     if (
+        //         (int) $customField['id'] ===
+        //         (int) config('services.amoCRM.discount_card_field_id')
+        //     ) {
+        //         return $customField['values'][0]['value'];
+        //     }
+        // }
 
-        return null;
+        // return null;
+
+        return AmoLead::findCustomFieldById(
+            $customFields,
+            config('services.amoCRM.discount_card_field_id')
+        );
     }
 }
