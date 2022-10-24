@@ -53,7 +53,7 @@ class Lead extends Model
         // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
 
         $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
-        $DISCOUNT_COMMON = $TOTAL_PRICE . 'p - ' . $DISCOUNT_PRICE . '%';
+        $DISCOUNT_COMMON = $TOTAL_PRICE . 'p - ' . $DISCOUNT_PERCENT . '%';
 
         // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
 
