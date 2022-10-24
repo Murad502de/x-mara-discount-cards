@@ -43,19 +43,21 @@ class Lead extends Model
     {
         // Log::info(__METHOD__, ['Lead[calculateDiscountPrice]']); //DELETE
 
+        $TOTAL_PRICE      = (float) $this->price + self::getTotalPrice();
         $DISCOUNT_PERCENT = $this->card
         ? (Card::isGold($this->card->number)
             ? self::TWENTY
-            : self::getDiscountPercent(self::getTotalPrice()))
+            : self::getDiscountPercent($TOTAL_PRICE))
         : self::ZERO;
 
         // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
 
-        $DISCOUNT_PRICE = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
+        $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
+        $DISCOUNT_COMMON = $TOTAL_PRICE . 'p - ' . $DISCOUNT_PRICE . '%';
 
         // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
 
-        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_PERCENT);
+        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
     }
     public static function createLead(
         int $amocrmId,
@@ -108,7 +110,15 @@ class Lead extends Model
         $leads = self::query()
             ->where('card_id', $this->card_id)
             ->where(function ($query) {
-                $query->where('status_id', '<>', (int) config('services.amoCRM.loss_stage_id'));
+                $query->where('status_id', (int) config('services.amoCRM.successful_stage_id'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_3'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_4'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_5'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_6'))
+                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_7'));
             })
             ->get()
             ->toArray();
@@ -143,7 +153,7 @@ class Lead extends Model
     }
 
     /* PROCEDURES */
-    private static function applyUpdates(int $amocrmId, float $discount_price, float $discount_percent): void
+    private static function applyUpdates(int $amocrmId, float $discount_price, float $discount_common): void
     {
         // Log::info(__METHOD__, ['Lead[amocrmId] ', $amocrmId]); //DELETE
         // Log::info(__METHOD__, ['Lead[discount_price] ', $discount_price]); //DELETE
@@ -159,7 +169,7 @@ class Lead extends Model
                 [
                     'field_id' => (int) config('services.amoCRM.discount_common'),
                     'values'   => [[
-                        'value' => $discount_percent . ' %',
+                        'value' => $discount_common,
                     ]],
                 ],
             ],
