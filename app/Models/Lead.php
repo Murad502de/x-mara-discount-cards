@@ -153,7 +153,7 @@ class Lead extends Model
     }
 
     /* PROCEDURES */
-    private static function applyUpdates(int $amocrmId, float $discount_price, float $discount_common): void
+    private static function applyUpdates(int $amocrmId, float $discount_price, string $discount_common): void
     {
         // Log::info(__METHOD__, ['Lead[amocrmId] ', $amocrmId]); //DELETE
         // Log::info(__METHOD__, ['Lead[discount_price] ', $discount_price]); //DELETE
