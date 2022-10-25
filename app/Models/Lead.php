@@ -108,6 +108,7 @@ class Lead extends Model
     private function getTotalPrice(): int
     {
         $leads = self::query()
+            ->where('id', '<>', $this->id)
             ->where('card_id', $this->card_id)
             ->where(function ($query) {
                 $query->where('status_id', (int) config('services.amoCRM.successful_stage_id'))
