@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
+use App\Jobs\UpdateDiscountCommon;
 use App\Models\Services\amoCRM;
 use App\Services\amoAPI\amoAPIHub;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
-// use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Log;
 
 class Lead extends Model
 {
@@ -38,26 +38,6 @@ class Lead extends Model
     public function card()
     {
         return $this->belongsTo(Card::class);
-    }
-    public function calculateDiscountPrice(): void
-    {
-        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice]']); //DELETE
-
-        $TOTAL_PRICE      = (float) $this->price + self::getTotalPrice();
-        $DISCOUNT_PERCENT = $this->card
-        ? (Card::isGold($this->card->number)
-            ? self::TWENTY
-            : self::getDiscountPercent($TOTAL_PRICE))
-        : self::ZERO;
-
-        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PERCENT] ' . $DISCOUNT_PERCENT]); //DELETE
-
-        $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
-        $DISCOUNT_COMMON = $TOTAL_PRICE . 'p - ' . $DISCOUNT_PERCENT . '%';
-
-        // Log::info(__METHOD__, ['Lead[calculateDiscountPrice][DISCOUNT_PRICE] ' . $DISCOUNT_PRICE]); //DELETE
-
-        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
     }
     public static function createLead(
         int $amocrmId,
@@ -105,9 +85,9 @@ class Lead extends Model
     }
 
     /* FUNCTIONS */
-    private function getTotalPrice(): int
+    private function getLeadsByCardId()
     {
-        $leads = self::query()
+        return self::query()
             ->where('id', '<>', $this->id)
             ->where('card_id', $this->card_id)
             ->where(function ($query) {
@@ -121,9 +101,11 @@ class Lead extends Model
                     ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_6'))
                     ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_7'));
             })
-            ->get()
-            ->toArray();
-
+            ->get();
+    }
+    private function getTotalPrice(): int
+    {
+        $leads      = $this->getLeadsByCardId()->toArray();
         $totalPrice = 0;
 
         foreach ($leads as $lead) {
@@ -156,10 +138,6 @@ class Lead extends Model
     /* PROCEDURES */
     private static function applyUpdates(int $amocrmId, float $discount_price, string $discount_common): void
     {
-        // Log::info(__METHOD__, ['Lead[amocrmId] ', $amocrmId]); //DELETE
-        // Log::info(__METHOD__, ['Lead[discount_price] ', $discount_price]); //DELETE
-        // Log::info(__METHOD__, ['Lead[discount_percent] ', $discount_percent]); //DELETE
-
         $authData = amoCRM::getAuthData();
         $amo      = new amoAPIHub($authData);
 
@@ -171,6 +149,51 @@ class Lead extends Model
                     'field_id' => (int) config('services.amoCRM.discount_common'),
                     'values'   => [[
                         'value' => $discount_common,
+                    ]],
+                ],
+            ],
+        ]]);
+    }
+
+    /* JOBS */
+    public function calculateDiscountPrice(): void
+    {
+        $TOTAL_PRICE      = (float) $this->price + self::getTotalPrice();
+        $DISCOUNT_PERCENT = $this->card
+        ? (Card::isGold($this->card->number)
+            ? self::TWENTY
+            : self::getDiscountPercent($TOTAL_PRICE))
+        : self::ZERO;
+
+        $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
+        $DISCOUNT_COMMON = $TOTAL_PRICE . 'p - ' . $DISCOUNT_PERCENT . '%';
+
+        $leads = $this->getLeadsByCardId();
+
+        foreach ($leads as $lead) {
+            Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
+
+            UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+        }
+
+        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
+    }
+    public function updateDiscountCommon(string $discountCommon): void
+    {
+        Log::info(__METHOD__); //DELETE
+        Log::info(__METHOD__, [$this->amocrm_id]); //DELETE
+        Log::info(__METHOD__, [$discountCommon]); //DELETE
+
+        $authData = amoCRM::getAuthData();
+        $amo      = new amoAPIHub($authData);
+
+        $amo->updateLead([[
+            'id'                   => (int) $this->amocrm_id,
+            'custom_fields_values' => [
+                [
+                    'field_id' => (int) config('services.amoCRM.discount_common'),
+                    'values'   => [[
+                        'value' => $discountCommon,
                     ]],
                 ],
             ],
