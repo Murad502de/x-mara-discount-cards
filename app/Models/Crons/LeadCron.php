@@ -4,11 +4,11 @@ namespace App\Models\Crons;
 
 use App\Jobs\CalculatePriceWithDiscount;
 use App\Models\Lead;
+use App\Services\amoAPI\Entities\Lead as AmoLead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
-use App\Services\amoAPI\Entities\Lead as AmoLead;
 
+// use Illuminate\Support\Facades\Log;
 class LeadCron extends Model
 {
     use HasFactory;
@@ -73,26 +73,24 @@ class LeadCron extends Model
         $LEAD_DATA    = json_decode($lead->data, true);
         $CUSTOM_FIELD = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
         $CARD_NUMBER  = self::findDiscountCardValue($CUSTOM_FIELD);
+        $PRICE        = (int) AmoLead::findCustomFieldById(
+            $CUSTOM_FIELD,
+            config('services.amoCRM.price_without_discount_id')
+        );
 
         if (
             (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
-            (int) $LEAD->price !== (int) $LEAD_DATA['price'] ||
+            (int) $LEAD->price !== $PRICE ||
             (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
         ) {
             $updateLead = Lead::updateLead(
                 (int) $LEAD->amocrm_id,
                 (int) $LEAD_DATA['status_id'],
                 $CARD_NUMBER,
-                (int) AmoLead::findCustomFieldById(
-                    $CUSTOM_FIELD,
-                    config('services.amoCRM.price_without_discount_id')
-                ),
+                $PRICE,
             );
 
-            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
-            Log::info(__METHOD__, ['status: ' . $LEAD_DATA['status_id']]); //DELETE
-            Log::info(__METHOD__, ['card: ' . $CARD_NUMBER]); //DELETE
-            Log::info(__METHOD__, ['price: ' . $LEAD_DATA['price']]); //DELETE
+            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
 
             CalculatePriceWithDiscount::dispatch($updateLead);
         } else {
