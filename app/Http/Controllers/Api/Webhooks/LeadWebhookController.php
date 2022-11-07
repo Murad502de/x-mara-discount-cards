@@ -36,8 +36,8 @@ class LeadWebhookController extends Controller
     {
         if (
             isset($data['id']) &&
-            ((int) $data['date_create'] >= (int) config('services.amoCRM.lead_created_at')) &&
-            ((int) $data['status_id'] !== (int) config('services.amoCRM.loss_stage_id'))
+            ((int) $data['date_create'] >= (int) config('services.amoCRM.lead_created_at'))
+            // ((int) $data['status_id'] !== (int) config('services.amoCRM.loss_stage_id'))
         ) {
             $lead = LeadCron::getLeadByAmoId($data['id']);
 
