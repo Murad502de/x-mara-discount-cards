@@ -122,6 +122,17 @@ class Lead extends Model
 
         return $totalPrice;
     }
+    private function getDiscountCommonPrice(): int
+    {
+        $leads      = $this->getActiveLeadsByCardId()->toArray();
+        $totalPrice = 0;
+
+        foreach ($leads as $lead) {
+            $totalPrice += $lead['price'];
+        }
+
+        return $totalPrice;
+    }
     private static function getDiscountPercent(int $price): int
     {
         if ($price >= self::THOUSANDS_500) {
@@ -174,7 +185,7 @@ class Lead extends Model
         : self::ZERO;
 
         $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
-        $DISCOUNT_COMMON = $TOTAL_PRICE . 'p - ' . $DISCOUNT_PERCENT . '%';
+        $DISCOUNT_COMMON = self::getDiscountCommonPrice() . 'p - ' . $DISCOUNT_PERCENT . '%';
 
         $leads = $this->getActiveLeadsByCardId();
 
