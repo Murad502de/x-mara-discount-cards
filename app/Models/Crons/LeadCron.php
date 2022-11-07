@@ -72,7 +72,7 @@ class LeadCron extends Model
     {
         $OLD_PRICE    = (int) $LEAD->price;
         $OLD_STATUS   = (int) $LEAD->status_id;
-        $OLD_CARD     = $LEAD->card ? $LEAD->card->number : null;
+        $OLD_CARD     = $LEAD->card ? $LEAD->card : null;
         $LEAD_DATA    = json_decode($lead->data, true);
         $CUSTOM_FIELD = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
         $CARD_NUMBER  = self::findDiscountCardValue($CUSTOM_FIELD);
