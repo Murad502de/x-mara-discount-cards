@@ -104,7 +104,7 @@ class Lead extends Model
             })
             ->get();
     }
-    private function getActiveLeadsByCardId(string $card)
+    private function getActiveLeadsByCardId(int $card)
     {
         return self::query()
             ->where('id', '<>', $this->id)
@@ -123,7 +123,7 @@ class Lead extends Model
 
         return $totalPrice;
     }
-    private function getDiscountCommonPrice(string $card): int
+    private function getDiscountCommonPrice(int $card): int
     {
         $leads      = $this->getActiveLeadsByCardId($card)->toArray();
         $totalPrice = 0;
@@ -189,9 +189,9 @@ class Lead extends Model
         $DISCOUNT_COMMON_PRICE = 0;
 
         if ($oldCard && !$this->card) {
-            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard);
+            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
-            $leads                 = $this->getActiveLeadsByCardId($oldCard);
+            $leads                 = $this->getActiveLeadsByCardId($oldCard->id);
 
             foreach ($leads as $lead) {
                 UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
@@ -201,9 +201,9 @@ class Lead extends Model
         }
 
         if (!$oldCard && $this->card) {
-            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->number);
+            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
-            $leads                 = $this->getActiveLeadsByCardId($this->card->number);
+            $leads                 = $this->getActiveLeadsByCardId($this->card->id);
 
             foreach ($leads as $lead) {
                 UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
@@ -213,9 +213,9 @@ class Lead extends Model
         }
 
         if ($oldCard && $this->card) {
-            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard);
+            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
-            $leads                 = $this->getActiveLeadsByCardId($oldCard);
+            $leads                 = $this->getActiveLeadsByCardId($oldCard->id);
 
             foreach ($leads as $lead) {
                 // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
@@ -225,9 +225,9 @@ class Lead extends Model
 
             ////////////////////////////////////////////////////////////////////////
 
-            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->number);
+            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
-            $leads                 = $this->getActiveLeadsByCardId($this->card->number);
+            $leads                 = $this->getActiveLeadsByCardId($this->card->id);
 
             foreach ($leads as $lead) {
                 // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
