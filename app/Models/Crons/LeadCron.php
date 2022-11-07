@@ -89,7 +89,10 @@ class LeadCron extends Model
                 ),
             );
 
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
+            Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
+            Log::info(__METHOD__, ['status: ' . $LEAD_DATA['status_id']]); //DELETE
+            Log::info(__METHOD__, ['card: ' . $CARD_NUMBER]); //DELETE
+            Log::info(__METHOD__, ['price: ' . $LEAD_DATA['price']]); //DELETE
 
             CalculatePriceWithDiscount::dispatch($updateLead);
         } else {
