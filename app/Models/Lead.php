@@ -172,7 +172,7 @@ class Lead extends Model
         $leads = $this->getLeadsByCardId();
 
         foreach ($leads as $lead) {
-            Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
+            // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
 
             UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
         }
@@ -181,9 +181,9 @@ class Lead extends Model
     }
     public function updateDiscountCommon(string $discountCommon): void
     {
-        Log::info(__METHOD__); //DELETE
-        Log::info(__METHOD__, [$this->amocrm_id]); //DELETE
-        Log::info(__METHOD__, [$discountCommon]); //DELETE
+        // Log::info(__METHOD__); //DELETE
+        // Log::info(__METHOD__, [$this->amocrm_id]); //DELETE
+        // Log::info(__METHOD__, [$discountCommon]); //DELETE
 
         $authData = amoCRM::getAuthData();
         $amo      = new amoAPIHub($authData);
