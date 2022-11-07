@@ -79,7 +79,7 @@ class LeadCron extends Model
         );
 
         if (
-            (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
+            // (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
             (int) $LEAD->price !== $PRICE ||
             (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
         ) {
