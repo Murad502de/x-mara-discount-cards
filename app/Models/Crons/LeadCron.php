@@ -8,7 +8,7 @@ use App\Services\amoAPI\Entities\Lead as AmoLead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Support\Facades\Log;
+// use Illuminate\Support\Facades\Log;
 class LeadCron extends Model
 {
     use HasFactory;
@@ -79,9 +79,7 @@ class LeadCron extends Model
         );
 
         if (
-            // (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
-            (int) $LEAD->price !== $PRICE ||
-            (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
+            (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id']
         ) {
             $updateLead = Lead::updateLead(
                 (int) $LEAD->amocrm_id,
@@ -96,7 +94,12 @@ class LeadCron extends Model
             // Log::info(__METHOD__, ['CARD_NUMBER: ', $CARD_NUMBER]); //DELETE
             // Log::info(__METHOD__, ['STATUS: ', $LEAD_DATA['status_id']]); //DELETE
 
-            CalculatePriceWithDiscount::dispatch($updateLead);
+            if (
+                (int) $LEAD->price !== $PRICE ||
+                (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
+            ) {
+                CalculatePriceWithDiscount::dispatch($updateLead);
+            }
         } else {
             // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
         }
