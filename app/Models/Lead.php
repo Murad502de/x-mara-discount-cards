@@ -185,7 +185,7 @@ class Lead extends Model
         : self::ZERO;
 
         $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
-        $DISCOUNT_COMMON = self::getDiscountCommonPrice() . 'p - ' . $DISCOUNT_PERCENT . '%';
+        $DISCOUNT_COMMON = (float) $this->price + self::getDiscountCommonPrice() . 'p - ' . $DISCOUNT_PERCENT . '%';
 
         $leads = $this->getActiveLeadsByCardId();
 
