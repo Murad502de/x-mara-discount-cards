@@ -90,17 +90,18 @@ class Lead extends Model
         return self::query()
             ->where('id', '<>', $this->id)
             ->where('card_id', $this->card_id)
-            ->where(function ($query) {
-                $query->where('status_id', (int) config('services.amoCRM.successful_stage_id'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_3'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_4'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_5'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_6'))
-                    ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_7'));
-            })
+            ->where('status_id', '<>', (int) config('services.amoCRM.loss_stage_id'))
+            // ->where(function ($query) {
+            //     $query->where('status_id', (int) config('services.amoCRM.successful_stage_id'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_1'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_2'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_3'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_4'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_5'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_6'))
+            //         ->orWhere('status_id', (int) config('services.amoCRM.conditionally_successful_stage_id_7'));
+            // })
             ->get();
     }
     private function getTotalPrice(): int
