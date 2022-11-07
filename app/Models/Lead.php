@@ -7,7 +7,8 @@ use App\Models\Services\amoCRM;
 use App\Services\amoAPI\amoAPIHub;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
+
+// use Illuminate\Support\Facades\Log;
 
 class Lead extends Model
 {
@@ -184,8 +185,9 @@ class Lead extends Model
             : self::getDiscountPercent($TOTAL_PRICE))
         : self::ZERO;
 
-        $DISCOUNT_PRICE  = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
-        $DISCOUNT_COMMON = (float) $this->price + self::getDiscountCommonPrice() . 'p - ' . $DISCOUNT_PERCENT . '%';
+        $DISCOUNT_PRICE        = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
+        $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice();
+        $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
 
         $leads = $this->getActiveLeadsByCardId();
 
