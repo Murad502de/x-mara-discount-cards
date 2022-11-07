@@ -24,7 +24,7 @@ class CalculatePriceWithDiscount implements ShouldQueue
      *
      * @return void
      */
-    public function __construct(Lead $lead, $oldPrice, $oldStatus, $oldCard)
+    public function __construct(Lead $lead, $oldPrice = 0, $oldStatus = null, $oldCard = null)
     {
         $this->lead      = $lead;
         $this->oldPrice  = $oldPrice;
