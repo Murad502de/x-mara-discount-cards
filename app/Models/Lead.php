@@ -104,11 +104,11 @@ class Lead extends Model
             })
             ->get();
     }
-    private function getActiveLeadsByCardId()
+    private function getActiveLeadsByCardId(string $card)
     {
         return self::query()
             ->where('id', '<>', $this->id)
-            ->where('card_id', $this->card_id)
+            ->where('card_id', $card)
             ->where('status_id', '<>', (int) config('services.amoCRM.loss_stage_id'))
             ->get();
     }
@@ -123,9 +123,9 @@ class Lead extends Model
 
         return $totalPrice;
     }
-    private function getDiscountCommonPrice(): int
+    private function getDiscountCommonPrice(string $card): int
     {
-        $leads      = $this->getActiveLeadsByCardId()->toArray();
+        $leads      = $this->getActiveLeadsByCardId($card)->toArray();
         $totalPrice = 0;
 
         foreach ($leads as $lead) {
@@ -176,7 +176,7 @@ class Lead extends Model
     }
 
     /* JOBS */
-    public function calculateDiscountPrice(): void
+    public function calculateDiscountPrice($oldPrice, $oldStatus, $oldCard): void
     {
         $TOTAL_PRICE      = (float) $this->price + self::getTotalPrice();
         $DISCOUNT_PERCENT = $this->card
@@ -186,18 +186,57 @@ class Lead extends Model
         : self::ZERO;
 
         $DISCOUNT_PRICE        = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
-        $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice();
-        $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
+        $DISCOUNT_COMMON_PRICE = 0;
 
-        $leads = $this->getActiveLeadsByCardId();
+        if ($oldCard && !$this->card) {
+            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard);
+            $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
+            $leads                 = $this->getActiveLeadsByCardId($oldCard);
 
-        foreach ($leads as $lead) {
-            // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
+            foreach ($leads as $lead) {
+                UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+            }
 
-            UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+            self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, '');
         }
 
-        self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
+        if (!$oldCard && $this->card) {
+            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->number);
+            $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
+            $leads                 = $this->getActiveLeadsByCardId($this->card->number);
+
+            foreach ($leads as $lead) {
+                UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+            }
+
+            self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
+        }
+
+        if ($oldCard && $this->card) {
+            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard);
+            $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
+            $leads                 = $this->getActiveLeadsByCardId($oldCard);
+
+            foreach ($leads as $lead) {
+                // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
+
+                UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+            }
+
+            ////////////////////////////////////////////////////////////////////////
+
+            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->number);
+            $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
+            $leads                 = $this->getActiveLeadsByCardId($this->card->number);
+
+            foreach ($leads as $lead) {
+                // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
+
+                UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+            }
+
+            self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
+        }
     }
     public function updateDiscountCommon(string $discountCommon): void
     {

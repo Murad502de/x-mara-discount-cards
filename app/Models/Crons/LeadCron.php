@@ -70,6 +70,9 @@ class LeadCron extends Model
     /* PROCEDURES */
     private static function haveAvailabilityLead(LeadCron $lead, Lead $LEAD): void
     {
+        $OLD_PRICE    = (int) $LEAD->price;
+        $OLD_STATUS   = (int) $LEAD->status_id;
+        $OLD_CARD     = $LEAD->card ? $LEAD->card->number : null;
         $LEAD_DATA    = json_decode($lead->data, true);
         $CUSTOM_FIELD = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
         $CARD_NUMBER  = self::findDiscountCardValue($CUSTOM_FIELD);
@@ -100,7 +103,12 @@ class LeadCron extends Model
                 (int) $LEAD->price !== $PRICE ||
                 (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
             ) {
-                CalculatePriceWithDiscount::dispatch($updateLead);
+                CalculatePriceWithDiscount::dispatch(
+                    $updateLead,
+                    $OLD_PRICE,
+                    $OLD_STATUS,
+                    $OLD_CARD
+                );
             }
         } else {
             // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
@@ -130,21 +138,6 @@ class LeadCron extends Model
     /* FUNCTIONS */
     private static function findDiscountCardValue($customFields): ?string
     {
-        // if (!$customFields) {
-        //     return null;
-        // }
-
-        // foreach ($customFields as $customField) {
-        //     if (
-        //         (int) $customField['id'] ===
-        //         (int) config('services.amoCRM.discount_card_field_id')
-        //     ) {
-        //         return $customField['values'][0]['value'];
-        //     }
-        // }
-
-        // return null;
-
         return AmoLead::findCustomFieldById(
             $customFields,
             config('services.amoCRM.discount_card_field_id')

@@ -15,15 +15,21 @@ class CalculatePriceWithDiscount implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $lead;
+    private $oldPrice;
+    private $oldStatus;
+    private $oldCard;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct(Lead $lead)
+    public function __construct(Lead $lead, $oldPrice, $oldStatus, $oldCard)
     {
-        $this->lead = $lead;
+        $this->lead      = $lead;
+        $this->oldPrice  = $oldPrice;
+        $this->oldStatus = $oldStatus;
+        $this->oldCard   = $oldCard;
     }
 
     /**
@@ -33,7 +39,11 @@ class CalculatePriceWithDiscount implements ShouldQueue
      */
     public function handle()
     {
-        $this->lead->calculateDiscountPrice();
+        $this->lead->calculateDiscountPrice(
+            $this->oldPrice,
+            $this->oldStatus,
+            $this->oldCard
+        );
     }
 
     /**
