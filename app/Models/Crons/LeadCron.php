@@ -100,6 +100,7 @@ class LeadCron extends Model
             // Log::info(__METHOD__, ['STATUS: ', $LEAD_DATA['status_id']]); //DELETE
 
             if (
+                (int) $LEAD->status_id === (int) config('services.amoCRM.loss_stage_id') ||
                 (int) $LEAD->price !== $PRICE ||
                 (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
             ) {
