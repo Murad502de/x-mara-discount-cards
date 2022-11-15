@@ -131,9 +131,9 @@ class Lead extends Model
 
         foreach ($leads as $lead) {
             if (self::isStageSuccess((int) $lead['status_id'])) {
-                $totalPrice += $lead['price'];
-            } else {
                 $totalPrice += $lead['discount_price'];
+            } else {
+                $totalPrice += $lead['price'];
             }
         }
 
@@ -204,7 +204,7 @@ class Lead extends Model
 
         $DISCOUNT_PRICE        = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
         $DISCOUNT_COMMON_PRICE = 0;
-        $price                 = self::isStageSuccess((int) $this->status_id) ? (float) $this->price : $DISCOUNT_PRICE;
+        $price                 = self::isStageSuccess((int) $this->status_id) ? (float) $DISCOUNT_PRICE : $this->price;
 
         self::where('amocrm_id', $this->amocrm_id)->update([
             'discount_price' => $DISCOUNT_PRICE,
