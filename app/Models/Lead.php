@@ -31,6 +31,7 @@ class Lead extends Model
         'status_id',
         'card_id',
         'price',
+        'discount_price',
     ];
     protected $hidden = [
         'id',
@@ -129,7 +130,11 @@ class Lead extends Model
         $totalPrice = 0;
 
         foreach ($leads as $lead) {
-            $totalPrice += $lead['price'];
+            if (self::isStageSuccess((int) $lead['status_id'])) {
+                $totalPrice += $lead['price'];
+            } else {
+                $totalPrice += $lead['discount_price'];
+            }
         }
 
         return $totalPrice;
@@ -153,6 +158,18 @@ class Lead extends Model
         }
 
         return self::THREE;
+    }
+    private static function isStageSuccess(int $stageId): bool
+    {
+        return $stageId === (int) config('services.amoCRM.successful_stage_id') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_1') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_2') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_3') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_4') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_5') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_6') ||
+        $stageId === (int) config('services.amoCRM.conditionally_successful_stage_id_7');
     }
 
     /* PROCEDURES */
@@ -188,6 +205,25 @@ class Lead extends Model
         $DISCOUNT_PRICE        = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
         $DISCOUNT_COMMON_PRICE = 0;
 
+        self::where('amocrm_id', $this->amocrm_id)->update([
+            'discount_price' => $DISCOUNT_PRICE,
+        ]);
+
+        if (
+            (int) $this->status_id === (int) config('services.amoCRM.loss_stage_id') &&
+            (int) $oldStatus !== (int) config('services.amoCRM.loss_stage_id')
+        ) {
+            $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard->id);
+            $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
+            $leads                 = $this->getActiveLeadsByCardId($oldCard->id);
+
+            foreach ($leads as $lead) {
+                UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
+            }
+
+            return;
+        }
+
         if ($oldCard && !$this->card) {
             $DISCOUNT_COMMON_PRICE = self::getDiscountCommonPrice($oldCard->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
@@ -198,6 +234,8 @@ class Lead extends Model
             }
 
             self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, '');
+
+            return;
         }
 
         if (!$oldCard && $this->card) {
@@ -210,6 +248,8 @@ class Lead extends Model
             }
 
             self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
+
+            return;
         }
 
         if ($oldCard && $this->card) {
@@ -218,8 +258,6 @@ class Lead extends Model
             $leads                 = $this->getActiveLeadsByCardId($oldCard->id);
 
             foreach ($leads as $lead) {
-                // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
-
                 UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
             }
 
@@ -230,12 +268,12 @@ class Lead extends Model
             $leads                 = $this->getActiveLeadsByCardId($this->card->id);
 
             foreach ($leads as $lead) {
-                // Log::info(__METHOD__, [$lead->amocrm_id]); //DELETE
-
                 UpdateDiscountCommon::dispatch($lead, $DISCOUNT_COMMON);
             }
 
             self::applyUpdates($this->amocrm_id, $DISCOUNT_PRICE, $DISCOUNT_COMMON);
+
+            return;
         }
     }
     public function updateDiscountCommon(string $discountCommon): void

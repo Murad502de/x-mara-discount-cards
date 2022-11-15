@@ -7,8 +7,8 @@ use App\Models\Lead;
 use App\Services\amoAPI\Entities\Lead as AmoLead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 
-// use Illuminate\Support\Facades\Log;
 class LeadCron extends Model
 {
     use HasFactory;
@@ -45,8 +45,6 @@ class LeadCron extends Model
     }
     public static function parseRecentWebhooks()
     {
-        // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks]']); //DELETE
-
         $leads = self::orderBy('id', 'asc')
             ->take(self::PARSE_COUNT)
             ->get();
@@ -54,56 +52,58 @@ class LeadCron extends Model
         foreach ($leads as $lead) {
             $LEAD = Lead::getLeadByAmoId((int) $lead->lead_id);
 
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][lead] ' . $lead->lead_id]); //DELETE
-
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
 
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETE] ' . $lead->lead_id]); //DELETE
-            // Log::info(__METHOD__, [json_encode($lead)]); //DELETE
-
-            $lead->delete();
-
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][parseRecentWebhooks][DELETED] ' . $tmp]); //DELETE
+            // $lead->delete(); //TODO es muss zurück wieder stellen
         }
     }
 
     /* PROCEDURES */
     private static function haveAvailabilityLead(LeadCron $lead, Lead $LEAD): void
     {
-        $OLD_PRICE    = (int) $LEAD->price;
-        $OLD_STATUS   = (int) $LEAD->status_id;
-        $OLD_CARD     = $LEAD->card ? $LEAD->card : null;
-        $LEAD_DATA    = json_decode($lead->data, true);
-        $CUSTOM_FIELD = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
-        $CARD_NUMBER  = self::findDiscountCardValue($CUSTOM_FIELD);
-        $PRICE        = (int) AmoLead::findCustomFieldById(
-            $CUSTOM_FIELD,
+        $LEAD_DATA       = json_decode($lead->data, true);
+        $CUSTOM_FIELDS   = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
+        $OLD_STATUS      = (int) $LEAD->status_id;
+        $OLD_CARD        = $LEAD->card ? $LEAD->card : null;
+        $OLD_CARD_NUMBER = $OLD_CARD ? $OLD_CARD->number : '';
+        $OLD_PRICE       = (int) $LEAD->price;
+        $STATUS          = (int) $LEAD_DATA['status_id'];
+        $CARD_NUMBER     = self::findDiscountCardValue($CUSTOM_FIELDS) ?? '';
+        $PRICE           = (int) AmoLead::findCustomFieldById(
+            $CUSTOM_FIELDS,
             config('services.amoCRM.price_without_discount_id')
         );
 
+        Log::info(__METHOD__, ['ID: ', $LEAD->amocrm_id]); //DELETE
+        Log::info(__METHOD__, ['PRICE - OLD_PRICE: ', $PRICE . ' - ' . $OLD_PRICE]); //DELETE
+        Log::info(__METHOD__, ['CARD_NUMBER - OLD_CARD: ', $CARD_NUMBER . ' - ' . $OLD_CARD_NUMBER]); //DELETE
+        Log::info(__METHOD__, ['STATUS - OLD_STATUS: ', $LEAD_DATA['status_id'] . ' - ' . $OLD_STATUS]); //DELETE
+
         if (
             (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
-            (int) $LEAD->price !== $PRICE ||
-            (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
+            self::isPriceChanged($PRICE, $OLD_PRICE) ||
+            self::isCardChanged($CARD_NUMBER, $OLD_CARD_NUMBER)
         ) {
-            $updateLead = Lead::updateLead(
+            Log::info(__METHOD__, ['must update']); //DELETE
+
+            $updateLead = Lead::updateLead( // TODO check
                 (int) $LEAD->amocrm_id,
                 (int) $LEAD_DATA['status_id'],
                 $CARD_NUMBER,
                 $PRICE,
             );
 
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] must update ']); //DELETE
-            // Log::info(__METHOD__, ['ID: ', $LEAD->amocrm_id]); //DELETE
-            // Log::info(__METHOD__, ['PRICE: ', $PRICE]); //DELETE
-            // Log::info(__METHOD__, ['CARD_NUMBER: ', $CARD_NUMBER]); //DELETE
-            // Log::info(__METHOD__, ['STATUS: ', $LEAD_DATA['status_id']]); //DELETE
-
             if (
-                (int) $LEAD->status_id === (int) config('services.amoCRM.loss_stage_id') ||
-                (int) $LEAD->price !== $PRICE ||
-                (!$LEAD->card && $CARD_NUMBER || ($LEAD->card && ($LEAD->card->number !== $CARD_NUMBER)))
+                !self::isLossStageNotChanged($STATUS, $OLD_STATUS) &&
+                (
+                    self::movedLeadFromNotLossToLoss($STATUS, $OLD_STATUS) ||
+                    self::movedLeadFromLossToNotLoss($STATUS, $OLD_STATUS) ||
+                    self::isPriceChanged($PRICE, $OLD_PRICE) ||
+                    self::isCardChanged($CARD_NUMBER, $OLD_CARD_NUMBER)
+                )
             ) {
+                Log::info(__METHOD__, ['set job: CalculatePriceWithDiscount']); //DELETE
+
                 CalculatePriceWithDiscount::dispatch(
                     $updateLead,
                     $OLD_PRICE,
@@ -111,15 +111,13 @@ class LeadCron extends Model
                     $OLD_CARD
                 );
             }
-        } else {
-            // Log::info(__METHOD__, ['Scheduler::[LeadCron][haveAvailabilityLead] not to update ']); //DELETE
         }
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void
     {
-        $LEAD_DATA    = json_decode($lead->data, true);
-        $CUSTOM_FIELD = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
-        $CARD_NUMBER  = self::findDiscountCardValue($CUSTOM_FIELD);
+        $LEAD_DATA     = json_decode($lead->data, true);
+        $CUSTOM_FIELDS = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
+        $CARD_NUMBER   = self::findDiscountCardValue($CUSTOM_FIELDS);
 
         if ($CARD_NUMBER) {
             $newLead = Lead::createLead(
@@ -127,7 +125,7 @@ class LeadCron extends Model
                 (int) $LEAD_DATA['status_id'],
                 $CARD_NUMBER,
                 (int) AmoLead::findCustomFieldById(
-                    $CUSTOM_FIELD,
+                    $CUSTOM_FIELDS,
                     config('services.amoCRM.price_without_discount_id')
                 ),
             );
@@ -143,5 +141,37 @@ class LeadCron extends Model
             $customFields,
             config('services.amoCRM.discount_card_field_id')
         );
+    }
+    private static function isPriceChanged(int $newPrice, int $oldPrice): bool
+    {
+        Log::info(__METHOD__, [$newPrice !== $oldPrice]); //DELETE
+
+        return $newPrice !== $oldPrice;
+    }
+    private static function isCardChanged($newCard, $oldCard): bool
+    {
+        Log::info(__METHOD__, [!$oldCard && $newCard || ($oldCard && ($oldCard !== $newCard))]); //DELETE
+
+        return !$oldCard && $newCard || ($oldCard && ($oldCard !== $newCard));
+    }
+    private static function movedLeadFromNotLossToLoss(int $newStatusId, int $oldStatusId): bool
+    {
+        Log::info(__METHOD__, [$oldStatusId !== (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id')]); //DELETE
+
+        return $oldStatusId !== (int) config('services.amoCRM.loss_stage_id') &&
+        $newStatusId === (int) config('services.amoCRM.loss_stage_id');
+    }
+    private static function movedLeadFromLossToNotLoss(int $newStatusId, int $oldStatusId): bool
+    {
+        Log::info(__METHOD__, [$oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId !== (int) config('services.amoCRM.loss_stage_id')]); //DELETE
+
+        return $oldStatusId === (int) config('services.amoCRM.loss_stage_id') &&
+        $newStatusId !== (int) config('services.amoCRM.loss_stage_id');
+    }
+    private static function isLossStageNotChanged(int $newStatusId, int $oldStatusId): bool
+    {
+        Log::info(__METHOD__, [$oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id')]); //DELETE
+
+        return $oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id');
     }
 }
