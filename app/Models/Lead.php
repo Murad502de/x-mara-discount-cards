@@ -204,6 +204,7 @@ class Lead extends Model
 
         $DISCOUNT_PRICE        = (float) $this->price - ((float) $this->price / 100) * $DISCOUNT_PERCENT;
         $DISCOUNT_COMMON_PRICE = 0;
+        $price                 = self::isStageSuccess((int) $this->status_id) ? (float) $this->price : $DISCOUNT_PRICE;
 
         self::where('amocrm_id', $this->amocrm_id)->update([
             'discount_price' => $DISCOUNT_PRICE,
@@ -239,7 +240,7 @@ class Lead extends Model
         }
 
         if (!$oldCard && $this->card) {
-            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->id);
+            $DISCOUNT_COMMON_PRICE = $price + self::getDiscountCommonPrice($this->card->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
             $leads                 = $this->getActiveLeadsByCardId($this->card->id);
 
@@ -263,7 +264,7 @@ class Lead extends Model
 
             ////////////////////////////////////////////////////////////////////////
 
-            $DISCOUNT_COMMON_PRICE = (float) $this->price + self::getDiscountCommonPrice($this->card->id);
+            $DISCOUNT_COMMON_PRICE = $price + self::getDiscountCommonPrice($this->card->id);
             $DISCOUNT_COMMON       = $DISCOUNT_COMMON_PRICE . 'p - ' . self::getDiscountPercent($DISCOUNT_COMMON_PRICE) . '%';
             $leads                 = $this->getActiveLeadsByCardId($this->card->id);
 
