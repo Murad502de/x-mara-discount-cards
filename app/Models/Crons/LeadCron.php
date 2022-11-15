@@ -55,7 +55,7 @@ class LeadCron extends Model
 
             $LEAD ? self::haveAvailabilityLead($lead, $LEAD) : self::dontHaveAvailabilityLead($lead);
 
-            // $lead->delete(); //TODO es muss zurück wieder stellen
+            $lead->delete();
         }
     }
 
