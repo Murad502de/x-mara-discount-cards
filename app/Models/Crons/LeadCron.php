@@ -7,7 +7,8 @@ use App\Models\Lead;
 use App\Services\amoAPI\Entities\Lead as AmoLead;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
+
+// use Illuminate\Support\Facades\Log;
 
 class LeadCron extends Model
 {
@@ -74,17 +75,17 @@ class LeadCron extends Model
             config('services.amoCRM.price_without_discount_id')
         );
 
-        Log::info(__METHOD__, ['ID: ', $LEAD->amocrm_id]); //DELETE
-        Log::info(__METHOD__, ['PRICE - OLD_PRICE: ', $PRICE . ' - ' . $OLD_PRICE]); //DELETE
-        Log::info(__METHOD__, ['CARD_NUMBER - OLD_CARD: ', $CARD_NUMBER . ' - ' . $OLD_CARD_NUMBER]); //DELETE
-        Log::info(__METHOD__, ['STATUS - OLD_STATUS: ', $LEAD_DATA['status_id'] . ' - ' . $OLD_STATUS]); //DELETE
+        // Log::info(__METHOD__, ['ID: ', $LEAD->amocrm_id]); //DELETE
+        // Log::info(__METHOD__, ['PRICE - OLD_PRICE: ', $PRICE . ' - ' . $OLD_PRICE]); //DELETE
+        // Log::info(__METHOD__, ['CARD_NUMBER - OLD_CARD: ', $CARD_NUMBER . ' - ' . $OLD_CARD_NUMBER]); //DELETE
+        // Log::info(__METHOD__, ['STATUS - OLD_STATUS: ', $LEAD_DATA['status_id'] . ' - ' . $OLD_STATUS]); //DELETE
 
         if (
             (int) $LEAD->status_id !== (int) $LEAD_DATA['status_id'] ||
             self::isPriceChanged($PRICE, $OLD_PRICE) ||
             self::isCardChanged($CARD_NUMBER, $OLD_CARD_NUMBER)
         ) {
-            Log::info(__METHOD__, ['must update']); //DELETE
+            // Log::info(__METHOD__, ['must update']); //DELETE
 
             $updateLead = Lead::updateLead( // TODO check
                 (int) $LEAD->amocrm_id,
@@ -102,7 +103,7 @@ class LeadCron extends Model
                     self::isCardChanged($CARD_NUMBER, $OLD_CARD_NUMBER)
                 )
             ) {
-                Log::info(__METHOD__, ['set job: CalculatePriceWithDiscount']); //DELETE
+                // Log::info(__METHOD__, ['set job: CalculatePriceWithDiscount']); //DELETE
 
                 CalculatePriceWithDiscount::dispatch(
                     $updateLead,
@@ -115,7 +116,7 @@ class LeadCron extends Model
     }
     private static function dontHaveAvailabilityLead(LeadCron $lead): void
     {
-        Log::info(__METHOD__); //DELETE
+        // Log::info(__METHOD__); //DELETE
 
         $LEAD_DATA     = json_decode($lead->data, true);
         $CUSTOM_FIELDS = isset($LEAD_DATA['custom_fields']) ? $LEAD_DATA['custom_fields'] : null;
@@ -146,33 +147,33 @@ class LeadCron extends Model
     }
     private static function isPriceChanged(int $newPrice, int $oldPrice): bool
     {
-        Log::info(__METHOD__, [$newPrice !== $oldPrice]); //DELETE
+        // Log::info(__METHOD__, [$newPrice !== $oldPrice]); //DELETE
 
         return $newPrice !== $oldPrice;
     }
     private static function isCardChanged($newCard, $oldCard): bool
     {
-        Log::info(__METHOD__, [!$oldCard && $newCard || ($oldCard && ($oldCard !== $newCard))]); //DELETE
+        // Log::info(__METHOD__, [!$oldCard && $newCard || ($oldCard && ($oldCard !== $newCard))]); //DELETE
 
         return !$oldCard && $newCard || ($oldCard && ($oldCard !== $newCard));
     }
     private static function movedLeadFromNotLossToLoss(int $newStatusId, int $oldStatusId): bool
     {
-        Log::info(__METHOD__, [$oldStatusId !== (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id')]); //DELETE
+        // Log::info(__METHOD__, [$oldStatusId !== (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id')]); //DELETE
 
         return $oldStatusId !== (int) config('services.amoCRM.loss_stage_id') &&
         $newStatusId === (int) config('services.amoCRM.loss_stage_id');
     }
     private static function movedLeadFromLossToNotLoss(int $newStatusId, int $oldStatusId): bool
     {
-        Log::info(__METHOD__, [$oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId !== (int) config('services.amoCRM.loss_stage_id')]); //DELETE
+        // Log::info(__METHOD__, [$oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId !== (int) config('services.amoCRM.loss_stage_id')]); //DELETE
 
         return $oldStatusId === (int) config('services.amoCRM.loss_stage_id') &&
         $newStatusId !== (int) config('services.amoCRM.loss_stage_id');
     }
     private static function isLossStageNotChanged(int $newStatusId, int $oldStatusId): bool
     {
-        Log::info(__METHOD__, [$oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id')]); //DELETE
+        // Log::info(__METHOD__, [$oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id')]); //DELETE
 
         return $oldStatusId === (int) config('services.amoCRM.loss_stage_id') && $newStatusId === (int) config('services.amoCRM.loss_stage_id');
     }
