@@ -2,13 +2,15 @@
 
 namespace App\Http\Middleware\Services\AmoCrm;
 
-use App\Exceptions\ForbiddenException;
-use App\Models\Services\amoCRM;
+use App\Traits\Middleware\Services\AmoCRM\AmoTokenExpirationControlTrait;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class AuthMiddleware
 {
+    use AmoTokenExpirationControlTrait;
+
     /**
      * Handle an incoming request.
      *
@@ -18,12 +20,13 @@ class AuthMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        $amoCrmCredentials = amoCRM::all()->first();
-
-        if (!$amoCrmCredentials) {
-            throw new ForbiddenException("Access denied");
+        if (self::amoTokenExpirationControl()) {
+            return $next($request);
+        } else {
+            return response()->json(
+                ['message' => 'Access denied'],
+                Response::HTTP_OK
+            );
         }
-
-        return $next($request);
     }
 }
